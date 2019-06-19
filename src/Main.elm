@@ -24,14 +24,14 @@ type alias Coords =
 
 tickInterval = 50
 playgroundSize = Coords 600 600
-elementSize = Coords 10 10
+elementSize = 20
 initialHead = Coords (playgroundSize.x // 2) (playgroundSize.y // 2)
 initialLength = 5
 initialBody = List.indexedMap (\i coords -> Coords coords.x (coords.y + i)) (List.repeat initialLength initialHead)
 initialSnake = Snake initialHead initialBody Down Down
 
 type Status
-    = Start
+    = PressKeyToStart
     | InGame
     | GameOver
 
@@ -63,7 +63,7 @@ subscriptions model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model InGame initialSnake (Coords 0 0 ) 0 , generateFoodPosition initialSnake )
+    ( Model PressKeyToStart initialSnake (Coords 0 0 ) 0 , generateFoodPosition initialSnake )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -150,51 +150,51 @@ unshiftSnake coords snake =
 
 view : Model -> Html Msg
 view model =
-    svg [ width ( getX playgroundSize ) , height ( getY playgroundSize )
-        , viewBox ( "0 0 " ++ ( getX playgroundSize ) ++ ( getY playgroundSize ) ) ] 
-    (
-          rect [ x "0", y "0", width "100%", height "100%", fill "black" ] []
-         ::(
+    svg [ width <| String.fromInt <| playgroundSize.x, height <| String.fromInt <| playgroundSize.y
+        , viewBox <| String.join " " <| List.map String.fromInt [0, 0, playgroundSize.x, playgroundSize.y] ]
+        <| List.concat [ 
+            [ rect [ x "0", y "0", width "100%", height "100%", fill "black" ] [] ]
+            ,
          case model.state of
-            Start ->
-                [ text_ [ x "0", y "0", Svg.Attributes.style "fill: white" ] [ Svg.text "Press key to play" ] ]
+            PressKeyToStart ->
+                [ svgText "50" "50" "Press a key to start" ]
 
             InGame ->
                 text_ [ x "5", y "15", Svg.Attributes.style "fill: white" ] 
                       [ Svg.text ( "Score: " ++ ( String.fromInt model.score ) ) ]
                 ::svgText "5" "30" ( "head: " ++ (String.fromInt model.snake.head.x) ++ ", " ++ (String.fromInt model.snake.head.y))
                 ::svgText "5" "45" ( "food: " ++ (String.fromInt model.foodPosition.x) ++ ", " ++ (String.fromInt model.foodPosition.y))
-                ::rect [ x (String.fromInt model.foodPosition.x), y (String.fromInt model.foodPosition.y), width "10px", height "10px", fill "red" ] []
-                ::List.map snakeElement ( model.snake.head :: model.snake.body )
+                ::rect [ x (String.fromInt model.foodPosition.x), y (String.fromInt model.foodPosition.y), width <| svgIntToPixels elementSize, height <| svgIntToPixels elementSize, rx "0.3%", fill "red" ] []
+                ::svgSnake model.snake
                 
 
             GameOver ->
                 text_ [ x "10", y "10", Svg.Attributes.style "fill: white" ] [ Svg.text "Game over" ]
                 ::svgSnake model.snake
-         )
-
-    )
+        ]
 
 svgSnake snake =
-    List.map snakeElement ( snake.head :: snake.body )
+    List.map svgSnakeElement ( snake.head :: snake.body )
 
 
 svgText x y text =
     text_ [ Svg.Attributes.x x, Svg.Attributes.y y, Svg.Attributes.style "fill: white" ] [ Svg.text text ]
 
-getX : Coords -> String
-getX coords = String.fromInt coords.x
-
-getY : Coords -> String
-getY coords = String.fromInt coords.y
-
 -- playground : Model -> Html Msg
 -- playground model =
 --     List.map snakeElement model
 
-snakeElement : Coords -> Svg Msg
-snakeElement coords =
-    rect [ x (String.fromInt coords.x), y (String.fromInt coords.y), width "10px", height "10px", fill "pink" ] []
+svgSnakeElement : Coords -> Svg Msg
+svgSnakeElement coords =
+    rect [ x (String.fromInt coords.x)
+         , y (String.fromInt coords.y)
+         , width <| svgIntToPixels elementSize
+         , height <| svgIntToPixels elementSize
+         , fill "pink" ] []
+
+svgIntToPixels : Int -> String
+svgIntToPixels int =
+    String.fromInt int ++ "px"
 
 getNextPosition : Snake -> Coords
 getNextPosition snake =
@@ -203,21 +203,21 @@ getNextPosition snake =
     in
     case snake.direction of
         Up ->
-            Coords head.x ( modBy playgroundSize.y ( head.y - 1 * elementSize.y) )
+            Coords head.x ( modBy playgroundSize.y ( head.y - 1 * elementSize) )
         Right ->
-            Coords ( modBy playgroundSize.x ( head.x + 1 * elementSize.x ) ) head.y
+            Coords ( modBy playgroundSize.x ( head.x + 1 * elementSize ) ) head.y
         Down ->
-            Coords head.x ( modBy playgroundSize.y ( head.y + 1 * elementSize.y ) )
+            Coords head.x ( modBy playgroundSize.y ( head.y + 1 * elementSize ) )
         Left ->
-            Coords ( modBy playgroundSize.x ( head.x - 1 * elementSize.x ) ) head.y
+            Coords ( modBy playgroundSize.x ( head.x - 1 * elementSize ) ) head.y
 
 allPlaygroundCoords : List Coords
 allPlaygroundCoords =
     let
-        xRange = List.range 0 (playgroundSize.x // elementSize.x - 1)
-        xCoors = List.map (\x -> x * elementSize.x) xRange
-        yRange = List.range 0 (playgroundSize.y // elementSize.y - 1)
-        yCoors = List.map (\y -> y * elementSize.y) yRange
+        xRange = List.range 0 (playgroundSize.x // elementSize - 1)
+        xCoors = List.map (\x -> x * elementSize) xRange
+        yRange = List.range 0 (playgroundSize.y // elementSize - 1)
+        yCoors = List.map (\y -> y * elementSize) yRange
     in
         List.concatMap (\x -> List.map ( Coords x ) yCoors) xCoors 
 
