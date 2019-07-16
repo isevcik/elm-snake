@@ -1,0 +1,26 @@
+html {
+    height: 100%;
+}
+
+.container {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgb(2,0,36);
+    background: linear-gradient(326deg, rgba(2,0,36,1) 0%, rgba(15,15,147,1) 35%, rgba(0,212,255,1) 100%);
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    color: #eee;
+    padding: 1.4rem;
+    font-family: monospace;
+}
+
+a, a:visited, a:active {
+    color: #eee;
+}

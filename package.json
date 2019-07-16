@@ -1,0 +1,24 @@
+{
+  "name": "elm-snake",
+  "version": "1.0.0",
+  "description": "Elm Snake Game",
+  "scripts": {
+    "clean": "rm -rf docs/ && mkdir docs/",
+    "compile": "elm make src/Main.elm --output=docs/main.js && cp src/index.html src/style.css docs/",
+    "build": "npm run clean && npm run compile",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isevcik/elm-snake.git"
+  },
+  "keywords": [
+    "elm"
+  ],
+  "author": "Ivan Sevcik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/isevcik/elm-snake/issues"
+  },
+  "homepage": "https://github.com/isevcik/elm-snake#readme"
+}
